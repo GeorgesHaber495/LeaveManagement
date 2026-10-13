@@ -67,3 +67,37 @@ once does not duplicate anything.
 The first attempt to run this on my machine was blocked by Windows Smart App
 Control, which refused to load the compiled DLL from the bin folder. Running
 the project under a different Windows account solved it.
+
+## Business rules
+
+- **Overlap.** A new request is refused if it overlaps an existing Pending or
+  Approved request from the same employee. Rejected and Cancelled requests do
+  not block anything. Two ranges overlap when the new start is on or before the
+  existing end and the new end is on or after the existing start — this covers
+  a request that starts inside an existing one, ends inside one, sits entirely
+  within one, or completely contains one.
+- **Balance at submission.** A request is refused if the employee does not have
+  enough remaining days of that type for the year the leave starts in. A missing
+  balance row counts as no entitlement, not unlimited.
+- **Balance at approval.** The check runs again when the manager approves,
+  because days can be consumed by another request in between.
+- **Approval is atomic.** Approving changes the request status, writes a history
+  row, and increases UsedDays. All three happen inside a database transaction,
+  so a failure part way through leaves the data unchanged. Without it, a status
+  that saved while the balance did not would be a silent error nobody would see.
+- **Rejecting does not touch the balance.**
+- **Only Pending requests can change.** Enforced in the services, not only by
+  hiding buttons in the views.
+
+## Tests
+
+Run with Test > Run All Tests. Covers the remaining-days calculation and the
+inclusive day count, including the single-day case and a range crossing a month
+boundary.
+
+## Known limitations
+
+- Public holidays are not handled; a request spanning one counts it as leave.
+- Half-days are not supported.
+- Any manager can approve any employee's request; there is no team structure.
+- Two managers approving the same request at the same moment is not handled.
