@@ -25,6 +25,13 @@
                         @Html.ActionLink("My leave", "Index", "LeaveRequests",
                             new { area = "" }, new { @class = "nav-link" })
                     </li>
+                    @if (User.IsInRole("Manager"))
+                    {
+                        <li class="nav-item">
+                            @Html.ActionLink("All requests", "Index", "Manager",
+                                new { area = "" }, new { @class = "nav-link" })
+                        </li>
+                    }
                 </ul>
                  @Html.Partial("_LoginPartial")
             </div>

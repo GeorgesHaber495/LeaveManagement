@@ -151,6 +151,7 @@
             
         }
         
+        
         public override void Down()
         {
             DropForeignKey("dbo.AspNetUserRoles", "RoleId", "dbo.AspNetRoles");

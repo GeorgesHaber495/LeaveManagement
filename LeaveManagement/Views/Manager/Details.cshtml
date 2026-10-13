@@ -1,0 +1,86 @@
+﻿@model LeaveManagement.ViewModels.ReviewLeaveRequestViewModel
+
+@{
+    ViewBag.Title = "Review request";
+    var request = Model.Request;
+}
+
+<h2>Review request</h2>
+
+<table class="table">
+    <tr><th>Employee</th><td>@request.User.FullName</td></tr>
+    <tr><th>Type</th><td>@request.LeaveType.Name</td></tr>
+    <tr><th>From</th><td>@request.StartDate.ToString("dd/MM/yyyy")</td></tr>
+    <tr><th>To</th><td>@request.EndDate.ToString("dd/MM/yyyy")</td></tr>
+    <tr><th>Days</th><td>@request.TotalDays</td></tr>
+    <tr><th>Reason</th><td>@request.Reason</td></tr>
+    <tr><th>Status</th><td>@request.Status</td></tr>
+    <tr><th>Submitted</th><td>@request.CreatedDate.ToString("dd/MM/yyyy HH:mm")</td></tr>
+</table>
+
+<h3>Balance for @request.LeaveType.Name in @request.StartDate.Year</h3>
+
+@if (Model.Balance == null)
+{
+    <p>No balance record for this employee and leave type.</p>
+}
+else
+{
+    <table class="table">
+        <tr><th>Allocated</th><td>@Model.Balance.AllocatedDays</td></tr>
+        <tr><th>Used</th><td>@Model.Balance.UsedDays</td></tr>
+        <tr><th>Remaining</th><td>@Model.Balance.RemainingDays</td></tr>
+    </table>
+}
+
+@if (request.Status == LeaveManagement.Models.Entities.LeaveStatus.Pending)
+{
+    <h3>Decision</h3>
+
+    using (Html.BeginForm("Decide", "Manager", new { id = request.Id }))
+    {
+        @Html.AntiForgeryToken()
+
+        <div class="row mb-3">
+            <div class="col-md-2">
+                @Html.LabelFor(m => m.ManagerComment, new { @class = "col-form-label" })
+            </div>
+            <div class="col-md-10">
+                @Html.TextAreaFor(m => m.ManagerComment, new { @class = "form-control", rows = 2 })
+            </div>
+        </div>
+
+        <button type="submit" name="approve" value="true" class="btn btn-success">Approve</button>
+        <button type="submit" name="approve" value="false" class="btn btn-danger">Reject</button>
+    }
+}
+
+<h3>History</h3>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>From</th>
+            <th>To</th>
+            <th>By</th>
+            <th>When</th>
+            <th>Comment</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var entry in Model.History)
+        {
+            <tr>
+                <td>@(entry.OldStatus == null ? "-" : entry.OldStatus.ToString())</td>
+                <td>@entry.NewStatus</td>
+                <td>@entry.ChangedByUser.FullName</td>
+                <td>@entry.ChangedDate.ToString("dd/MM/yyyy HH:mm")</td>
+                <td>@entry.Comment</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<p>
+    @Html.ActionLink("Back to list", "Index")
+</p>

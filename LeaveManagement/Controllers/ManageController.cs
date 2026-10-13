@@ -1,12 +1,17 @@
-﻿using System;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Web;
-using System.Web.Mvc;
+﻿using LeaveManagement.Models;
+using LeaveManagement.ViewModels;
 using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.Owin;
 using Microsoft.Owin.Security;
-using LeaveManagement.Models;
+using System;
+using System.Linq;
+using System.Net;
+using System.Threading.Tasks;
+using System.Web;
+using System.Web.Mvc;
+using System.Web.Services.Description;
+using System.Net;
+using LeaveManagement.ViewModels;
 
 namespace LeaveManagement.Controllers
 {
@@ -332,8 +337,9 @@ namespace LeaveManagement.Controllers
 
             base.Dispose(disposing);
         }
+       
 
-#region Helpers
+        #region Helpers
         // Used for XSRF protection when adding external logins
         private const string XsrfKey = "XsrfId";
 
