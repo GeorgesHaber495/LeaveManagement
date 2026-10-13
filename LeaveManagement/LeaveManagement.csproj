@@ -194,6 +194,7 @@
     <Compile Include="Models\IdentityModels.cs" />
     <Compile Include="Models\ManageViewModels.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Services\DecisionResult.cs" />
     <Compile Include="Services\LeaveRequestService.cs" />
     <Compile Include="Services\LeaveReviewService.cs" />
     <Compile Include="Startup.cs" />

@@ -67,9 +67,27 @@ namespace LeaveManagement.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Create(CreateLeaveRequestViewModel model)
         {
+            var userId = User.Identity.GetUserId();
+
             if (!service.DatesAreValid(model.StartDate, model.EndDate))
             {
                 ModelState.AddModelError("EndDate", "The end date cannot be before the start date.");
+            }
+            else
+            {
+                if (service.HasOverlap(userId, model.StartDate, model.EndDate))
+                {
+                    ModelState.AddModelError("StartDate",
+                        "You already have a request that covers these dates.");
+                }
+
+                int totalDays = LeaveRequestService.CountDays(model.StartDate, model.EndDate);
+
+                if (!service.HasSufficientBalance(userId, model.LeaveTypeId, model.StartDate, totalDays))
+                {
+                    ModelState.AddModelError("LeaveTypeId",
+                        "You do not have enough days left for this leave type.");
+                }
             }
 
             if (!ModelState.IsValid)
@@ -78,14 +96,11 @@ namespace LeaveManagement.Controllers
                 return View(model);
             }
 
-            var userId = User.Identity.GetUserId();
-
             service.CreateRequest(userId, model.LeaveTypeId, model.StartDate,
                 model.EndDate, model.Reason);
 
             return RedirectToAction("Index");
         }
-
         private IEnumerable<SelectListItem> BuildLeaveTypeList()
         {
             return service.GetActiveLeaveTypes()
@@ -95,6 +110,7 @@ namespace LeaveManagement.Controllers
                     Text = t.Name
                 })
                 .ToList();
+
         }
         [HttpPost]
         [ValidateAntiForgeryToken]

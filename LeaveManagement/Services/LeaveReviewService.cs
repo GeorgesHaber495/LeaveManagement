@@ -57,37 +57,69 @@ namespace LeaveManagement.Services
                 .OrderBy(h => h.ChangedDate)
                 .ToList();
         }
-        public bool Decide(int id, string managerId, bool approve, string comment)
+        public DecisionResult Decide(int id, string managerId, bool approve, string comment)
         {
             var request = db.LeaveRequests.FirstOrDefault(r => r.Id == id);
 
-            if (request == null || request.Status != LeaveStatus.Pending)
+            if (request == null)
             {
-                return false;
+                return DecisionResult.NotFound;
+            }
+
+            if (request.Status != LeaveStatus.Pending)
+            {
+                return DecisionResult.NotPending;
             }
 
             var newStatus = approve ? LeaveStatus.Approved : LeaveStatus.Rejected;
 
-            request.Status = newStatus;
-            
-            request.ManagerComment = comment;
-            request.ReviewedByUserId = managerId;
-            request.ReviewedDate = DateTime.Now;
-            request.UpdatedDate = DateTime.Now;
-
-            db.LeaveStatusHistories.Add(new LeaveStatusHistory
+            using (var transaction = db.Database.BeginTransaction())
             {
-                LeaveRequestId = request.Id,
-                OldStatus = LeaveStatus.Pending,
-                NewStatus = newStatus,
-                ChangedByUserId = managerId,
-                ChangedDate = request.ReviewedDate.Value,
-                Comment = comment
-            });
+                try
+                {
+                    if (approve)
+                    {
+                        var balance = db.LeaveBalances.FirstOrDefault(b =>
+                            b.UserId == request.UserId &&
+                            b.LeaveTypeId == request.LeaveTypeId &&
+                            b.Year == request.StartDate.Year);
 
-            db.SaveChanges();
+                        if (balance == null || balance.RemainingDays < request.TotalDays)
+                        {
+                            transaction.Rollback();
+                            return DecisionResult.InsufficientBalance;
+                        }
 
-            return true;
+                        balance.UsedDays = balance.UsedDays + request.TotalDays;
+                    }
+
+                    request.Status = newStatus;
+                    request.ManagerComment = comment;
+                    request.ReviewedByUserId = managerId;
+                    request.ReviewedDate = DateTime.Now;
+                    request.UpdatedDate = DateTime.Now;
+
+                    db.LeaveStatusHistories.Add(new LeaveStatusHistory
+                    {
+                        LeaveRequestId = request.Id,
+                        OldStatus = LeaveStatus.Pending,
+                        NewStatus = newStatus,
+                        ChangedByUserId = managerId,
+                        ChangedDate = request.ReviewedDate.Value,
+                        Comment = comment
+                    });
+
+                    db.SaveChanges();
+                    transaction.Commit();
+
+                    return DecisionResult.Success;
+                }
+                catch
+                {
+                    transaction.Rollback();
+                    throw;
+                }
+            }
         }
     }
 }

@@ -63,10 +63,20 @@ namespace LeaveManagement.Controllers
         public ActionResult Decide(int id, bool approve, string managerComment)
         {
             var managerId = User.Identity.GetUserId();
+            var result = service.Decide(id, managerId, approve, managerComment);
 
-            if (!service.Decide(id, managerId, approve, managerComment))
+            if (result == DecisionResult.NotFound)
             {
                 return HttpNotFound();
+            }
+
+            if (result == DecisionResult.NotPending)
+            {
+                TempData["Message"] = "This request has already been decided.";
+            }
+            else if (result == DecisionResult.InsufficientBalance)
+            {
+                TempData["Message"] = "The employee does not have enough days left for this leave type.";
             }
 
             return RedirectToAction("Details", new { id = id });

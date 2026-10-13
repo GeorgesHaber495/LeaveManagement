@@ -47,9 +47,8 @@ namespace LeaveManagement.Services
         {
             return endDate >= startDate;
         }
-
         public LeaveRequest CreateRequest(string userId, int leaveTypeId,
-            DateTime startDate, DateTime endDate, string reason)
+    DateTime startDate, DateTime endDate, string reason)
         {
             var request = new LeaveRequest
             {
@@ -57,7 +56,7 @@ namespace LeaveManagement.Services
                 LeaveTypeId = leaveTypeId,
                 StartDate = startDate,
                 EndDate = endDate,
-                TotalDays = (endDate - startDate).Days + 1,
+                TotalDays = CountDays(startDate, endDate),
                 Reason = reason,
                 Status = LeaveStatus.Pending,
                 CreatedDate = DateTime.Now
@@ -80,6 +79,8 @@ namespace LeaveManagement.Services
 
             return request;
         }
+
+
         public bool CancelRequest(int id, string userId)
         {
             var request = db.LeaveRequests
@@ -107,6 +108,39 @@ namespace LeaveManagement.Services
 
             return true;
         }
+        public bool HasOverlap(string userId, DateTime startDate, DateTime endDate)
+        {
+            return db.LeaveRequests.Any(r =>
+                r.UserId == userId &&
+                (r.Status == LeaveStatus.Pending || r.Status == LeaveStatus.Approved) &&
+                startDate <= r.EndDate &&
+                endDate >= r.StartDate);
+        }
+        public static int CountDays(DateTime startDate, DateTime endDate)
+        {
+            return (endDate - startDate).Days + 1;
+        }
+
+        public LeaveBalance GetBalance(string userId, int leaveTypeId, int year)
+        {
+            return db.LeaveBalances
+                .FirstOrDefault(b => b.UserId == userId
+                    && b.LeaveTypeId == leaveTypeId
+                    && b.Year == year);
+        }
+
+        public bool HasSufficientBalance(string userId, int leaveTypeId, DateTime startDate, int totalDays)
+        {
+            var balance = GetBalance(userId, leaveTypeId, startDate.Year);
+
+            if (balance == null)
+            {
+                return false;
+            }
+
+            return balance.RemainingDays >= totalDays;
+        }
+       
 
     }
 }
