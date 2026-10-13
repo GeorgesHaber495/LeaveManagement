@@ -1,0 +1,71 @@
+﻿@model LeaveManagement.Models.Entities.LeaveRequest
+
+@{
+    ViewBag.Title = "Leave request";
+}
+
+<h2>Leave request</h2>
+
+<table class="table">
+    <tr>
+        <th>Type</th>
+        <td>@Model.LeaveType.Name</td>
+    </tr>
+    <tr>
+        <th>From</th>
+        <td>@Model.StartDate.ToString("dd/MM/yyyy")</td>
+    </tr>
+    <tr>
+        <th>To</th>
+        <td>@Model.EndDate.ToString("dd/MM/yyyy")</td>
+    </tr>
+    <tr>
+        <th>Days</th>
+        <td>@Model.TotalDays</td>
+    </tr>
+    <tr>
+        <th>Reason</th>
+        <td>@Model.Reason</td>
+    </tr>
+    <tr>
+        <th>Status</th>
+        <td>@Model.Status</td>
+    </tr>
+    <tr>
+        <th>Submitted</th>
+        <td>@Model.CreatedDate.ToString("dd/MM/yyyy HH:mm")</td>
+    </tr>
+</table>
+
+@if (Model.ReviewedByUser != null)
+{
+    <h3>Decision</h3>
+
+    <table class="table">
+        <tr>
+            <th>Reviewed by</th>
+            <td>@Model.ReviewedByUser.FullName</td>
+        </tr>
+        <tr>
+            <th>Reviewed on</th>
+            <td>@Model.ReviewedDate.Value.ToString("dd/MM/yyyy")</td>
+        </tr>
+        <tr>
+            <th>Comment</th>
+            <td>@Model.ManagerComment</td>
+        </tr>
+    </table>
+}
+
+@if (Model.Status == LeaveManagement.Models.Entities.LeaveStatus.Pending)
+{
+    using (Html.BeginForm("Cancel", "LeaveRequests", new { id = Model.Id }))
+    {
+        @Html.AntiForgeryToken()
+        <button type="submit" class="btn btn-danger">Cancel this request</button>
+    }
+}
+
+<p>
+    @Html.ActionLink("Back to list", "Index")
+</p>
