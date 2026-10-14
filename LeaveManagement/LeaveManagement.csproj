@@ -46,6 +46,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.CodeDom.Providers.DotNetCompilerPlatform, Version=2.0.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\lib\net45\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System" />
     <Reference Include="System.Data" />
@@ -158,9 +161,6 @@
     <Reference Include="Microsoft.Owin.Security.OAuth">
       <HintPath>..\packages\Microsoft.Owin.Security.OAuth.4.2.2\lib\net45\Microsoft.Owin.Security.OAuth.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.CodeDom.Providers.DotNetCompilerPlatform">
-      <HintPath>..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\lib\net45\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="App_Start\BundleConfig.cs" />
@@ -197,8 +197,11 @@
     <Compile Include="Services\DecisionResult.cs" />
     <Compile Include="Services\LeaveRequestService.cs" />
     <Compile Include="Services\LeaveReviewService.cs" />
+    <Compile Include="Services\PagedRequests.cs" />
     <Compile Include="Startup.cs" />
     <Compile Include="ViewModels\CreateLeaveRequestViewModel.cs" />
+    <Compile Include="ViewModels\LeaveRequestDetailsViewModel.cs" />
+    <Compile Include="ViewModels\LeaveRequestSearchViewModel.cs" />
     <Compile Include="ViewModels\ReviewLeaveRequestViewModel.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -278,6 +281,7 @@
     <Content Include="Views\LeaveRequests\Create.cshtml" />
     <Content Include="Views\Manager\Index.cshtml" />
     <Content Include="Views\Manager\Details.cshtml" />
+    <Content Include="Views\LeaveRequests\Balances.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

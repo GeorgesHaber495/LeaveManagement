@@ -1,4 +1,4 @@
-﻿@model List<LeaveManagement.Models.Entities.LeaveRequest>
+﻿@model LeaveManagement.ViewModels.LeaveRequestSearchViewModel
 
 @{
     ViewBag.Title = "My leave requests";
@@ -8,11 +8,41 @@
 
 <p>
     @Html.ActionLink("New request", "Create", null, new { @class = "btn btn-primary" })
+    @Html.ActionLink("My balances", "Balances", null, new { @class = "btn btn-secondary" })
 </p>
 
-@if (Model.Count == 0)
+@using (Html.BeginForm("Index", "LeaveRequests", FormMethod.Get))
 {
-    <p>You have not submitted any leave requests yet.</p>
+    <div class="row mb-3">
+        <div class="col-md-3">
+            @Html.TextBoxFor(m => m.Search, new { @class = "form-control", placeholder = "Reason" })
+        </div>
+        <div class="col-md-2">
+            @Html.EnumDropDownListFor(m => m.Status, "Any status", new { @class = "form-select" })
+        </div>
+        <div class="col-md-2">
+            @Html.DropDownListFor(m => m.LeaveTypeId, Model.LeaveTypes, "Any type",
+                new { @class = "form-select" })
+        </div>
+        <div class="col-md-2">
+            @Html.TextBoxFor(m => m.From, "{0:yyyy-MM-dd}",
+                new { @class = "form-control", type = "date" })
+        </div>
+        <div class="col-md-2">
+            @Html.TextBoxFor(m => m.To, "{0:yyyy-MM-dd}",
+                new { @class = "form-control", type = "date" })
+        </div>
+        <div class="col-md-1">
+            <button type="submit" class="btn btn-secondary">Search</button>
+        </div>
+    </div>
+}
+
+<p>@Model.TotalCount request(s) found.</p>
+
+@if (Model.Results.Count == 0)
+{
+    <p>No requests match your search.</p>
 }
 else
 {
@@ -29,7 +59,7 @@ else
             </tr>
         </thead>
         <tbody>
-            @foreach (var request in Model)
+            @foreach (var request in Model.Results)
             {
                 <tr>
                     <td>@request.LeaveType.Name</td>
@@ -43,4 +73,27 @@ else
             }
         </tbody>
     </table>
+
+    if (Model.TotalPages > 1)
+    {
+        <nav>
+            <ul class="pagination">
+                @for (int i = 1; i <= Model.TotalPages; i++)
+                {
+                    <li class="page-item @(i == Model.Page ? "active" : "")">
+                        @Html.ActionLink(i.ToString(), "Index", new
+                        {
+                            search = Model.Search,
+                            status = Model.Status,
+                            leaveTypeId = Model.LeaveTypeId,
+                            from = Model.From,
+                            to = Model.To,
+                            page = i,
+                            pageSize = Model.PageSize
+                        }, new { @class = "page-link" })
+                    </li>
+                }
+            </ul>
+        </nav>
+    }
 }

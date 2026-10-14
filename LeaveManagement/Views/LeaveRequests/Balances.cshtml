@@ -1,0 +1,40 @@
+﻿@model List<LeaveManagement.Models.Entities.LeaveBalance>
+
+@{
+    ViewBag.Title = "My leave balances";
+}
+
+<h2>My leave balances for @ViewBag.Year</h2>
+
+@if (Model.Count == 0)
+{
+    <p>No balances have been set up for this year.</p>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Leave type</th>
+                <th>Allocated</th>
+                <th>Used</th>
+                <th>Remaining</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var balance in Model)
+            {
+                <tr>
+                    <td>@balance.LeaveType.Name</td>
+                    <td>@balance.AllocatedDays</td>
+                    <td>@balance.UsedDays</td>
+                    <td>@balance.RemainingDays</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+<p>
+    @Html.ActionLink("Back to my requests", "Index")
+</p>

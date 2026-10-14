@@ -140,7 +140,72 @@ namespace LeaveManagement.Services
 
             return balance.RemainingDays >= totalDays;
         }
-       
+        public List<LeaveBalance> GetBalancesForUser(string userId, int year)
+        {
+            return db.LeaveBalances
+                .Include(b => b.LeaveType)
+                .Where(b => b.UserId == userId && b.Year == year)
+                .OrderBy(b => b.LeaveType.Name)
+                .ToList();
+        }
+        public List<LeaveStatusHistory> GetHistoryForRequest(int leaveRequestId)
+        {
+            return db.LeaveStatusHistories
+                .Include(h => h.ChangedByUser)
+                .Where(h => h.LeaveRequestId == leaveRequestId)
+                .OrderBy(h => h.ChangedDate)
+                .ToList();
+        }
+        public PagedRequests SearchRequests(string userId, string search, LeaveStatus? status,
+    int? leaveTypeId, DateTime? from, DateTime? to, int page, int pageSize)
+        {
+            var query = db.LeaveRequests
+                .Include(r => r.LeaveType)
+                .Include(r => r.User)
+                .AsQueryable();
 
+            if (userId != null)
+            {
+                query = query.Where(r => r.UserId == userId);
+            }
+
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                query = query.Where(r =>
+                    r.User.FirstName.Contains(search) ||
+                    r.User.LastName.Contains(search) ||
+                    r.Reason.Contains(search));
+            }
+
+            if (status != null)
+            {
+                query = query.Where(r => r.Status == status.Value);
+            }
+
+            if (leaveTypeId != null)
+            {
+                query = query.Where(r => r.LeaveTypeId == leaveTypeId.Value);
+            }
+
+            if (from != null)
+            {
+                query = query.Where(r => r.EndDate >= from.Value);
+            }
+
+            if (to != null)
+            {
+                query = query.Where(r => r.StartDate <= to.Value);
+            }
+
+            int total = query.Count();
+
+            var items = query
+                .OrderByDescending(r => r.CreatedDate)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+
+            return new PagedRequests { Items = items, TotalCount = total };
+        }
     }
 }

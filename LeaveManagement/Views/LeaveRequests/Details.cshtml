@@ -1,71 +1,68 @@
-﻿@model LeaveManagement.Models.Entities.LeaveRequest
+﻿@model LeaveManagement.ViewModels.LeaveRequestDetailsViewModel
 
 @{
     ViewBag.Title = "Leave request";
+    var request = Model.Request;
 }
 
 <h2>Leave request</h2>
 
 <table class="table">
-    <tr>
-        <th>Type</th>
-        <td>@Model.LeaveType.Name</td>
-    </tr>
-    <tr>
-        <th>From</th>
-        <td>@Model.StartDate.ToString("dd/MM/yyyy")</td>
-    </tr>
-    <tr>
-        <th>To</th>
-        <td>@Model.EndDate.ToString("dd/MM/yyyy")</td>
-    </tr>
-    <tr>
-        <th>Days</th>
-        <td>@Model.TotalDays</td>
-    </tr>
-    <tr>
-        <th>Reason</th>
-        <td>@Model.Reason</td>
-    </tr>
-    <tr>
-        <th>Status</th>
-        <td>@Model.Status</td>
-    </tr>
-    <tr>
-        <th>Submitted</th>
-        <td>@Model.CreatedDate.ToString("dd/MM/yyyy HH:mm")</td>
-    </tr>
+    <tr><th>Type</th><td>@request.LeaveType.Name</td></tr>
+    <tr><th>From</th><td>@request.StartDate.ToString("dd/MM/yyyy")</td></tr>
+    <tr><th>To</th><td>@request.EndDate.ToString("dd/MM/yyyy")</td></tr>
+    <tr><th>Days</th><td>@request.TotalDays</td></tr>
+    <tr><th>Reason</th><td>@request.Reason</td></tr>
+    <tr><th>Status</th><td>@request.Status</td></tr>
+    <tr><th>Submitted</th><td>@request.CreatedDate.ToString("dd/MM/yyyy HH:mm")</td></tr>
 </table>
 
-@if (Model.ReviewedByUser != null)
+@if (request.ReviewedByUser != null)
 {
     <h3>Decision</h3>
 
     <table class="table">
-        <tr>
-            <th>Reviewed by</th>
-            <td>@Model.ReviewedByUser.FullName</td>
-        </tr>
-        <tr>
-            <th>Reviewed on</th>
-            <td>@Model.ReviewedDate.Value.ToString("dd/MM/yyyy")</td>
-        </tr>
-        <tr>
-            <th>Comment</th>
-            <td>@Model.ManagerComment</td>
-        </tr>
+        <tr><th>Reviewed by</th><td>@request.ReviewedByUser.FullName</td></tr>
+        <tr><th>Reviewed on</th><td>@request.ReviewedDate.Value.ToString("dd/MM/yyyy")</td></tr>
+        <tr><th>Comment</th><td>@request.ManagerComment</td></tr>
     </table>
 }
 
-@if (Model.Status == LeaveManagement.Models.Entities.LeaveStatus.Pending)
+@if (request.Status == LeaveManagement.Models.Entities.LeaveStatus.Pending)
 {
-    using (Html.BeginForm("Cancel", "LeaveRequests", new { id = Model.Id }))
+    using (Html.BeginForm("Cancel", "LeaveRequests", new { id = request.Id }))
     {
         @Html.AntiForgeryToken()
         <button type="submit" class="btn btn-danger">Cancel this request</button>
     }
 }
 
+<h3>History</h3>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>From</th>
+            <th>To</th>
+            <th>By</th>
+            <th>When</th>
+            <th>Comment</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var entry in Model.History)
+        {
+            <tr>
+                <td>@(entry.OldStatus == null ? "-" : entry.OldStatus.ToString())</td>
+                <td>@entry.NewStatus</td>
+                <td>@entry.ChangedByUser.FullName</td>
+                <td>@entry.ChangedDate.ToString("dd/MM/yyyy HH:mm")</td>
+                <td>@entry.Comment</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
 <p>
-    @Html.ActionLink("Back to list", "Index")
+    @Html.ActionLink("Back to my requests", "Index")
 </p>

@@ -20,11 +20,28 @@ namespace LeaveManagement.Controllers
             service = new LeaveRequestService(db);
         }
 
-        public ActionResult Index()
+        public ActionResult Index(LeaveRequestSearchViewModel model)
         {
+            if (model.Page < 1)
+            {
+                model.Page = 1;
+            }
+
+            if (model.PageSize < 1)
+            {
+                model.PageSize = 10;
+            }
+
             var userId = User.Identity.GetUserId();
-            var requests = service.GetRequestsForUser(userId);
-            return View(requests);
+
+            var result = service.SearchRequests(userId, model.Search, model.Status,
+                model.LeaveTypeId, model.From, model.To, model.Page, model.PageSize);
+
+            model.Results = result.Items;
+            model.TotalCount = result.TotalCount;
+            model.LeaveTypes = BuildLeaveTypeList();
+
+            return View(model);
         }
         public ActionResult Details(int? id)
         {
@@ -41,7 +58,14 @@ namespace LeaveManagement.Controllers
                 return HttpNotFound();
             }
 
-            return View(request);
+
+            var model = new LeaveRequestDetailsViewModel
+            {
+                Request = request,
+                History = service.GetHistoryForRequest(request.Id)
+            };
+
+            return View(model);
         }
 
         protected override void Dispose(bool disposing)
@@ -124,6 +148,15 @@ namespace LeaveManagement.Controllers
             }
 
             return RedirectToAction("Index");
+        }
+        public ActionResult Balances()
+        {
+            var userId = User.Identity.GetUserId();
+            var balances = service.GetBalancesForUser(userId, DateTime.Today.Year);
+
+            ViewBag.Year = DateTime.Today.Year;
+
+            return View(balances);
         }
     }
 }

@@ -2,9 +2,11 @@
 using LeaveManagement.Services;
 using LeaveManagement.ViewModels;
 using Microsoft.AspNet.Identity;
+using Microsoft.AspNet.Identity;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Web.Mvc;
-using Microsoft.AspNet.Identity;
 namespace LeaveManagement.Controllers
 {
     [Authorize(Roles = "Manager")]
@@ -12,18 +14,44 @@ namespace LeaveManagement.Controllers
     {
         private ApplicationDbContext db = new ApplicationDbContext();
         private LeaveReviewService service;
+        private LeaveRequestService requestService;
 
         public ManagerController()
         {
             service = new LeaveReviewService(db);
+            requestService = new LeaveRequestService(db);
+        }
+        public ActionResult Index(LeaveRequestSearchViewModel model)
+        {
+            if (model.Page < 1)
+            {
+                model.Page = 1;
+            }
+
+            if (model.PageSize < 1)
+            {
+                model.PageSize = 10;
+            }
+
+            var result = requestService.SearchRequests(null, model.Search, model.Status,
+                model.LeaveTypeId, model.From, model.To, model.Page, model.PageSize);
+
+            model.Results = result.Items;
+            model.TotalCount = result.TotalCount;
+            model.LeaveTypes = BuildLeaveTypeList();
+
+            return View(model);
         }
 
-        public ActionResult Index(bool pendingOnly = false)
+        private IEnumerable<SelectListItem> BuildLeaveTypeList()
         {
-            var requests = service.GetAllRequests(pendingOnly);
-            ViewBag.PendingOnly = pendingOnly;
-
-            return View(requests);
+            return requestService.GetActiveLeaveTypes()
+                .Select(t => new SelectListItem
+                {
+                    Value = t.Id.ToString(),
+                    Text = t.Name
+                })
+                .ToList();
         }
 
         protected override void Dispose(bool disposing)

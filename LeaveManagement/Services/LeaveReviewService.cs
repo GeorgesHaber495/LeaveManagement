@@ -79,7 +79,7 @@ namespace LeaveManagement.Services
                 {
                     if (approve)
                     {
-                        var balance = db.LeaveBalances.FirstOrDefault(b =>
+                        var balance= db.LeaveBalances.FirstOrDefault(b =>
                             b.UserId == request.UserId &&
                             b.LeaveTypeId == request.LeaveTypeId &&
                             b.Year == request.StartDate.Year);
