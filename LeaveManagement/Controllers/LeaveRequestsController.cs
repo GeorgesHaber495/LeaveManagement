@@ -106,6 +106,7 @@ namespace LeaveManagement.Controllers
                 }
 
                 int totalDays = LeaveRequestService.CountDays(model.StartDate, model.EndDate);
+               
 
                 if (!service.HasSufficientBalance(userId, model.LeaveTypeId, model.StartDate, totalDays))
                 {

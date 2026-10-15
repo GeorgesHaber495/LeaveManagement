@@ -207,5 +207,48 @@ namespace LeaveManagement.Services
 
             return new PagedRequests { Items = items, TotalCount = total };
         }
+        public List<StatusCount> GetStatusCounts(string userId)
+        {
+            var query = db.LeaveRequests.AsQueryable();
+
+            if (userId != null)
+            {
+                query = query.Where(r => r.UserId == userId);
+            }
+
+            return query
+                .GroupBy(r => r.Status)
+                .Select(g => new StatusCount
+                {
+                    Status = g.Key,
+                    Count = g.Count()
+                })
+                .ToList();
+        }
+
+
+
+
+
+
+
+        public List<LeaveRequest> GetUpcomingApproved(string userId, DateTime fromDate, DateTime toDate)
+        {
+            var query = db.LeaveRequests
+                .Include(r => r.LeaveType)
+                .Include(r => r.User)
+                .Where(r => r.Status == LeaveStatus.Approved
+                    && r.StartDate >= fromDate
+                    && r.StartDate <= toDate);
+
+            if (userId != null)
+            {
+                query = query.Where(r => r.UserId == userId);
+            }
+
+            return query
+                .OrderBy(r => r.StartDate)
+                .ToList();
+        }
     }
 }

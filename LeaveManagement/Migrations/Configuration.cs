@@ -46,6 +46,7 @@
             CreateUser(userManager, "manager@demo.local", "Rana", "Khoury", "Manager");
             CreateUser(userManager, "employee@demo.local", "Karim", "Nasr", "Employee");
             CreateUser(userManager, "employee2@demo.local", "Lara", "Daou", "Employee");
+            CreateUser(userManager, "employee3@demo.local", "Georges", "Haber", "Employee");
         }
 
         private void CreateUser(UserManager<ApplicationUser> userManager,

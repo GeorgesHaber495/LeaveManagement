@@ -1,0 +1,124 @@
+﻿@model LeaveManagement.ViewModels.DashboardViewModel
+@using LeaveManagement.Models.Entities
+
+@{
+    ViewBag.Title = "Dashboard";
+}
+
+<h2>Dashboard</h2>
+
+@if (Model.IsManager)
+{
+    <p>These figures cover all employees.</p>
+}
+else
+{
+    <p>These figures cover your own requests.</p>
+}
+
+<h3>Requests</h3>
+
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h4>@Model.CountFor(LeaveStatus.Pending)</h4>
+                <p>Pending</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h4>@Model.CountFor(LeaveStatus.Approved)</h4>
+                <p>Approved</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h4>@Model.CountFor(LeaveStatus.Rejected)</h4>
+                <p>Rejected</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h4>@Model.CountFor(LeaveStatus.Cancelled)</h4>
+                <p>Cancelled</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<h3>My balances for @DateTime.Today.Year</h3>
+
+@if (Model.Balances.Count == 0)
+{
+    <p>No balances have been set up for this year.</p>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Leave type</th>
+                <th>Allocated</th>
+                <th>Used</th>
+                <th>Remaining</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var balance in Model.Balances)
+            {
+                <tr>
+                    <td>@balance.LeaveType.Name</td>
+                    <td>@balance.AllocatedDays</td>
+                    <td>@balance.UsedDays</td>
+                    <td>@balance.RemainingDays</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+<h3>Approved leave starting in the next 30 days</h3>
+
+@if (Model.Upcoming.Count == 0)
+{
+    <p>No approved leave is starting in the next 30 days.</p>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                @if (Model.IsManager)
+                {
+                    <th>Employee</th>
+                }
+                <th>Type</th>
+                <th>From</th>
+                <th>To</th>
+                <th>Days</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var request in Model.Upcoming)
+            {
+                <tr>
+                    @if (Model.IsManager)
+                    {
+                        <td>@request.User.FullName</td>
+                    }
+                    <td>@request.LeaveType.Name</td>
+                    <td>@request.StartDate.ToString("dd/MM/yyyy")</td>
+                    <td>@request.EndDate.ToString("dd/MM/yyyy")</td>
+                    <td>@request.TotalDays</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
