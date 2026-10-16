@@ -5,6 +5,8 @@
         Success = 1,
         NotFound = 2,
         NotPending = 3,
-        InsufficientBalance = 4
+        InsufficientBalance = 4,
+        CannotReviewOwnRequest=5
+
     }
 }

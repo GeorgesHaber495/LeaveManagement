@@ -106,6 +106,10 @@ namespace LeaveManagement.Controllers
             {
                 TempData["Message"] = "The employee does not have enough days left for this leave type.";
             }
+            else if (result == DecisionResult.CannotReviewOwnRequest)
+            {
+                TempData["Message"] = "You cannot approve or reject your own request.";
+            }
 
             return RedirectToAction("Details", new { id = id });
         }

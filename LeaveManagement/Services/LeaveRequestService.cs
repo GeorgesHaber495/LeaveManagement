@@ -148,6 +148,30 @@ namespace LeaveManagement.Services
                 .OrderBy(b => b.LeaveType.Name)
                 .ToList();
         }
+        public void CreateInitialBalances(string userId, int year)
+        {
+            var types = db.LeaveTypes.Where(t => t.IsActive).ToList();
+
+            foreach (var type in types)
+            {
+                bool exists = db.LeaveBalances.Any(b =>
+                    b.UserId == userId && b.LeaveTypeId == type.Id && b.Year == year);
+
+                if (!exists)
+                {
+                    db.LeaveBalances.Add(new LeaveBalance
+                    {
+                        UserId = userId,
+                        LeaveTypeId = type.Id,
+                        Year = year,
+                        AllocatedDays = type.DefaultAnnualAllowance,
+                        UsedDays = 0
+                    });
+                }
+            }
+
+            db.SaveChanges();
+        }
         public List<LeaveStatusHistory> GetHistoryForRequest(int leaveRequestId)
         {
             return db.LeaveStatusHistories
@@ -225,12 +249,7 @@ namespace LeaveManagement.Services
                 })
                 .ToList();
         }
-
-
-
-
-
-
+        
 
         public List<LeaveRequest> GetUpcomingApproved(string userId, DateTime fromDate, DateTime toDate)
         {

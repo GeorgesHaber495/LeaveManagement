@@ -70,6 +70,7 @@ namespace LeaveManagement.Services
             {
                 return DecisionResult.NotPending;
             }
+            if (request.UserId == managerId) { return DecisionResult.CannotReviewOwnRequest; }
 
             var newStatus = approve ? LeaveStatus.Approved : LeaveStatus.Rejected;
 

@@ -6,7 +6,10 @@
 }
 
 <h2>Review request</h2>
-
+@if (TempData["Message"] != null)
+{
+    <div class="alert alert-warning">@TempData["Message"]</div>
+}
 <table class="table">
     <tr><th>Employee</th><td>@request.User.FullName</td></tr>
     <tr><th>Type</th><td>@request.LeaveType.Name</td></tr>
